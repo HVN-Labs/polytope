@@ -276,6 +276,8 @@
             </div>
             <button id="remove-polygon-mode">Remove Polygon</button>
             <button id="remove-vertex-mode">Remove Vertex</button>
+            <button id="undo-vertex" disabled title="Undo (0/5)" style="background: #95a5a6;">Undo</button>
+            <button id="redo-vertex" disabled title="Redo (0/5)" style="background: #95a5a6;">Redo</button>
             <button id="subdivide-edges" style="background: #3498db;">Subdivide Edges</button>
             <button id="export-skybrush" style="background: #27ae60;">Export to Skybrush</button>
         </div>
@@ -370,6 +372,11 @@
         let vertexSpheresGroup = null; // Group containing all vertex spheres
         let vertexSphereMap = new Map(); // Map vertex index to sphere mesh
         let zScale = 1.0; // Vertical scale factor
+
+        // Undo/Redo history for vertex removal (max 5 entries)
+        const MAX_HISTORY = 5;
+        let undoStack = [];
+        let redoStack = [];
 
         // Initialize Three.js scene
         function initScene() {
@@ -619,6 +626,9 @@
                 const vertexIndex = clickedSphere.userData.vertexIndex;
 
                 if (vertexIndex !== undefined) {
+                    // Save current state before modification
+                    saveStateForUndo();
+
                     // Remove all faces that contain this vertex
                     currentPolyhedron.faces = currentPolyhedron.faces.filter(face => {
                         return !face.includes(vertexIndex);
@@ -627,10 +637,112 @@
                     // Re-render the polyhedron
                     displayPolyhedron(currentPolyhedron, currentNotation);
                     updateInfo(currentPolyhedron, currentNotation);
+                    updateUndoRedoButtons();
 
                     console.log(`Removed vertex ${vertexIndex} and all connected faces. Remaining faces: ${currentPolyhedron.faces.length}`);
                 }
             }
+        }
+
+        // Save current polyhedron state for undo
+        function saveStateForUndo() {
+            if (!currentPolyhedron) return;
+
+            // Deep copy the current state
+            const state = {
+                vertices: JSON.parse(JSON.stringify(currentPolyhedron.vertices)),
+                faces: JSON.parse(JSON.stringify(currentPolyhedron.faces)),
+                name: currentPolyhedron.name
+            };
+
+            undoStack.push(state);
+
+            // Limit history to MAX_HISTORY
+            if (undoStack.length > MAX_HISTORY) {
+                undoStack.shift();
+            }
+
+            // Clear redo stack when new action is performed
+            redoStack = [];
+        }
+
+        // Undo last vertex removal
+        function undoVertexRemoval() {
+            if (undoStack.length === 0 || !currentPolyhedron) return;
+
+            // Save current state to redo stack
+            const currentState = {
+                vertices: JSON.parse(JSON.stringify(currentPolyhedron.vertices)),
+                faces: JSON.parse(JSON.stringify(currentPolyhedron.faces)),
+                name: currentPolyhedron.name
+            };
+            redoStack.push(currentState);
+
+            // Limit redo history
+            if (redoStack.length > MAX_HISTORY) {
+                redoStack.shift();
+            }
+
+            // Restore previous state
+            const previousState = undoStack.pop();
+            currentPolyhedron.vertices = previousState.vertices;
+            currentPolyhedron.faces = previousState.faces;
+            currentPolyhedron.name = previousState.name;
+
+            // Re-render
+            displayPolyhedron(currentPolyhedron, currentNotation);
+            updateInfo(currentPolyhedron, currentNotation);
+            updateUndoRedoButtons();
+
+            console.log('Undo: Restored previous state');
+        }
+
+        // Redo last undone vertex removal
+        function redoVertexRemoval() {
+            if (redoStack.length === 0 || !currentPolyhedron) return;
+
+            // Save current state to undo stack
+            const currentState = {
+                vertices: JSON.parse(JSON.stringify(currentPolyhedron.vertices)),
+                faces: JSON.parse(JSON.stringify(currentPolyhedron.faces)),
+                name: currentPolyhedron.name
+            };
+            undoStack.push(currentState);
+
+            // Restore redo state
+            const redoState = redoStack.pop();
+            currentPolyhedron.vertices = redoState.vertices;
+            currentPolyhedron.faces = redoState.faces;
+            currentPolyhedron.name = redoState.name;
+
+            // Re-render
+            displayPolyhedron(currentPolyhedron, currentNotation);
+            updateInfo(currentPolyhedron, currentNotation);
+            updateUndoRedoButtons();
+
+            console.log('Redo: Restored next state');
+        }
+
+        // Update undo/redo button states
+        function updateUndoRedoButtons() {
+            const undoBtn = document.getElementById('undo-vertex');
+            const redoBtn = document.getElementById('redo-vertex');
+
+            if (undoBtn) {
+                undoBtn.disabled = undoStack.length === 0;
+                undoBtn.title = `Undo (${undoStack.length}/${MAX_HISTORY})`;
+            }
+            if (redoBtn) {
+                redoBtn.disabled = redoStack.length === 0;
+                redoBtn.title = `Redo (${redoStack.length}/${MAX_HISTORY})`;
+            }
+        }
+
+        // Clear history when generating new polyhedron
+        function clearHistory() {
+            undoStack = [];
+            redoStack = [];
+            updateUndoRedoButtons();
         }
 
         function subdivideEdges() {
@@ -733,6 +845,9 @@
                 const poly = await response.json();
                 currentPolyhedron = poly;
                 currentNotation = notation;
+
+                // Clear undo/redo history for new polyhedron
+                clearHistory();
 
                 // Update display
                 displayPolyhedron(poly, notation);
@@ -1145,6 +1260,29 @@
                         sphere.material.emissive.setHex(0x667eea);
                     });
                 }
+            }
+        });
+
+        // Undo/Redo buttons
+        document.getElementById('undo-vertex').addEventListener('click', () => {
+            undoVertexRemoval();
+        });
+
+        document.getElementById('redo-vertex').addEventListener('click', () => {
+            redoVertexRemoval();
+        });
+
+        // Keyboard shortcuts for undo/redo
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Z or Cmd+Z for undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undoVertexRemoval();
+            }
+            // Ctrl+Y or Cmd+Shift+Z for redo
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                e.preventDefault();
+                redoVertexRemoval();
             }
         });
 
