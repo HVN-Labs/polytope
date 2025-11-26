@@ -56,18 +56,36 @@ const server = http.createServer((req, res) => {
         });
         req.on('end', () => {
             try {
-                const { vertices, filename } = JSON.parse(body);
+                const { vertices, faces, filename, animation, bounds } = JSON.parse(body);
                 const outputFile = filename || 'vertices_show.skyc';
                 const outputPath = path.join(__dirname, '../output', outputFile);
 
-                // Convert vertices to JSON string for command line
-                const verticesJson = JSON.stringify(vertices);
+                // Build export config with all settings
+                const exportConfig = {
+                    vertices,
+                    faces: faces || [],
+                    outputFile: outputPath,
+                    animation: animation || {
+                        enableRotation: false,
+                        rotationSpeed: 4,
+                        duration: 30,
+                        fps: 25
+                    },
+                    bounds: bounds || {
+                        targetEdgeLength: 4,
+                        altitudeOffset: 15
+                    }
+                };
 
-                // Call Python export script
+                // Convert to JSON string for command line
+                const configJson = JSON.stringify(exportConfig);
+
+                // Call Python export script with full config (use venv Python)
                 const pythonScript = path.join(__dirname, 'python/export_vertices.py');
-                const pythonCmd = `python3 "${pythonScript}" '${verticesJson}' '${outputPath}'`;
+                const venvPython = path.join(__dirname, '../venv/bin/python3');
+                const pythonCmd = `"${venvPython}" "${pythonScript}" '${configJson}'`;
 
-                exec(pythonCmd, { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+                exec(pythonCmd, { cwd: path.join(__dirname, '..'), maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
                     if (error) {
                         console.error('Export error:', stderr);
                         res.writeHead(500, { 'Content-Type': 'application/json' });

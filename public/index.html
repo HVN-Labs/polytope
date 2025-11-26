@@ -254,6 +254,249 @@
             border-radius: 3px;
             font-family: 'Courier New', monospace;
         }
+
+        /* Polygon Types Section */
+        .polygon-types-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .polygon-type-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .polygon-canvas {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .polygon-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .polygon-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .polygon-count {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .polygon-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .remove-polygon-btn {
+            padding: 5px 8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .remove-polygon-btn:hover {
+            background: #c0392b;
+        }
+
+        .remove-polygon-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .remove-half-btn {
+            padding: 5px 8px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .remove-half-btn:hover {
+            background: #d68910;
+        }
+
+        .remove-half-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Animate Panel */
+        .animate-panel {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 200;
+            width: 320px;
+            max-height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        .animate-panel.active {
+            display: block;
+        }
+
+        .animate-panel-content {
+            padding: 15px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #9b59b6;
+            padding-bottom: 10px;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .settings-section {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .settings-section h4 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .animation-section {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f8f8;
+            border-radius: 8px;
+        }
+
+        .animation-section h4 {
+            margin: 0 0 10px 0;
+            color: #9b59b6;
+            font-size: 14px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .setting-row label {
+            color: #555;
+            font-size: 13px;
+        }
+
+        .setting-row span {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .setting-row input[type="number"] {
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .play-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .play-btn:hover {
+            background: #219a52;
+        }
+
+        .stop-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .stop-btn:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .stop-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .export-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .export-btn:hover {
+            background: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -279,7 +522,7 @@
             <button id="undo-vertex" disabled title="Undo (0/5)" style="background: #95a5a6;">Undo</button>
             <button id="redo-vertex" disabled title="Redo (0/5)" style="background: #95a5a6;">Redo</button>
             <button id="subdivide-edges" style="background: #3498db;">Subdivide Edges</button>
-            <button id="export-skybrush" style="background: #27ae60;">Export to Skybrush</button>
+            <button id="animate-btn" style="background: #9b59b6;">Animate</button>
         </div>
         <div class="examples">
             <strong>Seeds:</strong>
@@ -307,6 +550,81 @@
         <div id="canvas-container">
             <div class="loading" id="loading">Loading...</div>
             <div class="mode-indicator" id="mode-indicator">🎯 REMOVE POLYGON MODE - Click to remove | Drag to rotate</div>
+
+            <!-- Animate Panel -->
+            <div class="animate-panel" id="animate-panel">
+                <div class="animate-panel-content">
+                    <div class="panel-header">
+                        <h3>Animations</h3>
+                        <button id="close-animate-panel" class="close-btn">&times;</button>
+                    </div>
+
+                    <!-- Global Settings -->
+                    <div class="settings-section">
+                        <h4>Export Bounds</h4>
+                        <div class="setting-row">
+                            <label for="xy-min">XY:</label>
+                            <input type="number" id="xy-min" value="-50" step="1" style="width:60px">
+                            <span>to</span>
+                            <input type="number" id="xy-max" value="50" step="1" style="width:60px">
+                        </div>
+                        <div class="setting-row">
+                            <label for="z-min">Altitude:</label>
+                            <input type="number" id="z-min" value="0" step="1" style="width:60px">
+                            <span>to</span>
+                            <input type="number" id="z-max" value="100" step="1" style="width:60px">
+                        </div>
+                        <div class="setting-row">
+                            <label for="animation-duration">Duration (s):</label>
+                            <input type="number" id="animation-duration" value="30" min="1" max="300" step="1" style="width:60px">
+                        </div>
+                    </div>
+
+                    <!-- Rotate Animation -->
+                    <div class="animation-section">
+                        <h4>🔄 Rotate</h4>
+                        <div class="setting-row">
+                            <label for="rotation-speed">Speed (m/s):</label>
+                            <input type="number" id="rotation-speed" value="4" min="0.1" max="20" step="0.1" style="width:70px">
+                        </div>
+                        <div class="button-row">
+                            <button id="play-rotate" class="play-btn">▶ Play</button>
+                            <button id="stop-rotate" class="stop-btn" disabled>■ Stop</button>
+                            <button id="export-rotate" class="export-btn">Export .skyc</button>
+                        </div>
+                    </div>
+
+                    <!-- Shrink Animation -->
+                    <div class="animation-section">
+                        <h4>📏 Shrink/Expand</h4>
+                        <div class="setting-row">
+                            <label for="scale-start">From:</label>
+                            <input type="number" id="scale-start" value="1" min="0.01" max="5" step="0.1" style="width:60px">
+                            <label for="scale-end">To:</label>
+                            <input type="number" id="scale-end" value="0.1" min="0.01" max="5" step="0.1" style="width:60px">
+                        </div>
+                        <div class="setting-row">
+                            <label for="shrink-speed">Speed (m/s):</label>
+                            <input type="number" id="shrink-speed" value="2" min="0.1" max="20" step="0.1" style="width:70px">
+                        </div>
+                        <div class="button-row">
+                            <button id="play-shrink" class="play-btn">▶ Play</button>
+                            <button id="stop-shrink" class="stop-btn" disabled>■ Stop</button>
+                            <button id="export-shrink" class="export-btn">Export .skyc</button>
+                        </div>
+                    </div>
+
+                    <!-- Combined Animation -->
+                    <div class="animation-section">
+                        <h4>🎬 Combined (Rotate + Shrink)</h4>
+                        <div class="button-row">
+                            <button id="play-combined" class="play-btn">▶ Play</button>
+                            <button id="stop-combined" class="stop-btn" disabled>■ Stop</button>
+                            <button id="export-combined" class="export-btn">Export .skyc</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="info-panel">
             <h2>Polyhedron Information</h2>
@@ -327,6 +645,17 @@
                     <div class="stat">
                         <span class="stat-label">Faces:</span>
                         <span class="stat-value" id="face-count">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Edges:</span>
+                        <span class="stat-value" id="edge-count">-</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>Polygon Types</h3>
+                    <div class="polygon-types-container" id="polygon-types-container">
+                        <div style="color: #666; font-size: 13px;">No polyhedron loaded</div>
                     </div>
                 </div>
 
@@ -377,6 +706,12 @@
         const MAX_HISTORY = 5;
         let undoStack = [];
         let redoStack = [];
+
+        // Animation state
+        let animationId = null;
+        let animationStartTime = null;
+        let originalVertices = null;
+        let currentAnimationType = null;
 
         // Initialize Three.js scene
         function initScene() {
@@ -523,6 +858,17 @@
                 }
             });
 
+            // Mouse wheel zoom
+            renderer.domElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomSpeed = 0.1;
+                const delta = e.deltaY > 0 ? 1 + zoomSpeed : 1 - zoomSpeed;
+
+                // Clamp camera position between 1 and 20
+                const newZ = camera.position.z * delta;
+                camera.position.z = Math.max(1, Math.min(20, newZ));
+            }, { passive: false });
+
             // Animation loop
             animate();
 
@@ -629,17 +975,18 @@
                     // Save current state before modification
                     saveStateForUndo();
 
-                    // Remove all faces that contain this vertex
-                    currentPolyhedron.faces = currentPolyhedron.faces.filter(face => {
-                        return !face.includes(vertexIndex);
-                    });
+                    // Remove the vertex from all faces (instead of removing entire faces)
+                    // This keeps other vertices intact when removing subdivision vertices
+                    currentPolyhedron.faces = currentPolyhedron.faces.map(face => {
+                        return face.filter(vIdx => vIdx !== vertexIndex);
+                    }).filter(face => face.length >= 3); // Keep only valid faces (3+ vertices)
 
                     // Re-render the polyhedron
                     displayPolyhedron(currentPolyhedron, currentNotation);
                     updateInfo(currentPolyhedron, currentNotation);
                     updateUndoRedoButtons();
 
-                    console.log(`Removed vertex ${vertexIndex} and all connected faces. Remaining faces: ${currentPolyhedron.faces.length}`);
+                    console.log(`Removed vertex ${vertexIndex}. Remaining faces: ${currentPolyhedron.faces.length}`);
                 }
             }
         }
@@ -745,6 +1092,250 @@
             updateUndoRedoButtons();
         }
 
+        // Animation playback functions
+        function startAnimation(type) {
+            if (!currentPolyhedron) {
+                alert('Please generate a polyhedron first');
+                return;
+            }
+
+            // Stop any existing animation
+            stopAnimation();
+
+            // Reset to skyc coordinate view (Z-up as vertical, like Skybrush)
+            // Rotate -90° around X to make Z point up, then tilt slightly for 3D perspective
+            const skybrushRotationX = -Math.PI / 2 + Math.PI / 8; // Z-up with slight tilt
+            const skybrushRotationY = Math.PI / 8; // Slight side angle
+
+            if (polyhedronMesh) {
+                polyhedronMesh.rotation.set(skybrushRotationX, skybrushRotationY, 0);
+            }
+            if (edgesMesh) {
+                edgesMesh.rotation.set(skybrushRotationX, skybrushRotationY, 0);
+            }
+            if (vertexSpheresGroup) {
+                vertexSpheresGroup.rotation.set(skybrushRotationX, skybrushRotationY, 0);
+            }
+            faceObjects.forEach(face => {
+                face.rotation.set(skybrushRotationX, skybrushRotationY, 0);
+            });
+
+            // Store original vertices
+            originalVertices = currentPolyhedron.vertices.map(v => [...v]);
+            currentAnimationType = type;
+            animationStartTime = performance.now();
+
+            // Get settings
+            const duration = parseFloat(document.getElementById('animation-duration').value) || 30;
+            const rotationSpeed = parseFloat(document.getElementById('rotation-speed').value) || 4;
+            const shrinkSpeed = parseFloat(document.getElementById('shrink-speed').value) || 2;
+            const scaleStart = parseFloat(document.getElementById('scale-start').value) || 1;
+            const scaleEnd = parseFloat(document.getElementById('scale-end').value) || 0.1;
+
+            // Calculate center of polyhedron (XY for rotation, Z for scaling)
+            let centerX = 0, centerY = 0, centerZ = 0;
+            originalVertices.forEach(v => {
+                centerX += v[0];
+                centerY += v[1];
+                centerZ += v[2];
+            });
+            centerX /= originalVertices.length;
+            centerY /= originalVertices.length;
+            centerZ /= originalVertices.length;
+
+            // Calculate max Z offset from center for shrink speed calculation
+            const maxZOffset = Math.max(...originalVertices.map(v => Math.abs(v[2] - centerZ)));
+            const totalZChange = maxZOffset * Math.abs(scaleStart - scaleEnd);
+            const shrinkDuration = totalZChange > 0 ? totalZChange / shrinkSpeed : duration;
+
+            // Calculate initial angles, radii, and Z offsets
+            const vertexData = originalVertices.map(v => {
+                const dx = v[0] - centerX;
+                const dy = v[1] - centerY;
+                const zOffset = v[2] - centerZ; // Offset from Z center
+                const radius = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                const omega = radius > 0.01 ? rotationSpeed / radius : 0;
+                return { x: v[0], y: v[1], z: v[2], dx, dy, zOffset, radius, angle, omega };
+            });
+
+            // Use appropriate duration based on animation type
+            const effectiveDuration = (type === 'shrink') ? shrinkDuration :
+                                      (type === 'combined') ? Math.max(duration, shrinkDuration) : duration;
+
+            // Update buttons
+            updateAnimationButtons(type, true);
+
+            // Animation loop
+            function animateFrame() {
+                const elapsed = (performance.now() - animationStartTime) / 1000;
+                const t = Math.min(elapsed / effectiveDuration, 1);
+
+                // Calculate current vertical scale (for shrink/expand - from both sides towards center)
+                let verticalScale = 1;
+                if (type === 'shrink' || type === 'combined') {
+                    const shrinkT = Math.min(elapsed / shrinkDuration, 1);
+                    verticalScale = scaleStart + (scaleEnd - scaleStart) * shrinkT;
+                }
+
+                // Update vertices
+                for (let i = 0; i < currentPolyhedron.vertices.length; i++) {
+                    const data = vertexData[i];
+                    let newX, newY, newZ;
+
+                    if (type === 'rotate' || type === 'combined') {
+                        // Rotate around Z axis (same as skyc export)
+                        const angle = data.angle + data.omega * elapsed;
+                        newX = centerX + data.radius * Math.cos(angle);
+                        newY = centerY + data.radius * Math.sin(angle);
+                    } else {
+                        // Keep original X, Y
+                        newX = data.x;
+                        newY = data.y;
+                    }
+
+                    // Scale Z from center (same as skyc export - shrinks from both sides)
+                    // z = centerZ + zOffset * scale
+                    newZ = centerZ + data.zOffset * verticalScale;
+
+                    currentPolyhedron.vertices[i] = [newX, newY, newZ];
+                }
+
+                // Re-render
+                displayPolyhedron(currentPolyhedron, currentNotation);
+
+                // Continue or loop
+                if (t < 1) {
+                    animationId = requestAnimationFrame(animateFrame);
+                } else {
+                    // Loop the animation
+                    animationStartTime = performance.now();
+                    animationId = requestAnimationFrame(animateFrame);
+                }
+            }
+
+            animationId = requestAnimationFrame(animateFrame);
+        }
+
+        function stopAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+
+            // Restore original vertices
+            if (originalVertices && currentPolyhedron) {
+                currentPolyhedron.vertices = originalVertices.map(v => [...v]);
+                displayPolyhedron(currentPolyhedron, currentNotation);
+            }
+
+            originalVertices = null;
+            updateAnimationButtons(currentAnimationType, false);
+            currentAnimationType = null;
+        }
+
+        function updateAnimationButtons(type, isPlaying) {
+            const types = ['rotate', 'shrink', 'combined'];
+            types.forEach(t => {
+                const playBtn = document.getElementById(`play-${t}`);
+                const stopBtn = document.getElementById(`stop-${t}`);
+                if (playBtn && stopBtn) {
+                    if (isPlaying && t === type) {
+                        playBtn.disabled = true;
+                        stopBtn.disabled = false;
+                    } else {
+                        playBtn.disabled = isPlaying;
+                        stopBtn.disabled = true;
+                    }
+                }
+            });
+        }
+
+        async function exportAnimation(type) {
+            if (!currentPolyhedron) {
+                alert('Please generate a polyhedron first');
+                return;
+            }
+
+            // Stop any playing animation first
+            stopAnimation();
+
+            const duration = parseFloat(document.getElementById('animation-duration').value) || 30;
+            const rotationSpeed = parseFloat(document.getElementById('rotation-speed').value) || 4;
+            const shrinkSpeed = parseFloat(document.getElementById('shrink-speed').value) || 2;
+            const scaleStart = parseFloat(document.getElementById('scale-start').value) || 1;
+            const scaleEnd = parseFloat(document.getElementById('scale-end').value) || 0.1;
+            const xyMin = parseFloat(document.getElementById('xy-min').value) || -50;
+            const xyMax = parseFloat(document.getElementById('xy-max').value) || 50;
+            const zMin = parseFloat(document.getElementById('z-min').value) || 0;
+            const zMax = parseFloat(document.getElementById('z-max').value) || 100;
+
+            // Get only the used vertices with Z scale applied
+            const usedVertices = getUsedVertices(currentPolyhedron);
+            const usedVertexArray = Array.from(usedVertices).sort((a, b) => a - b);
+
+            // Create mapping from old index to new index
+            const indexMap = new Map();
+            usedVertexArray.forEach((oldIdx, newIdx) => {
+                indexMap.set(oldIdx, newIdx);
+            });
+
+            const vertices = usedVertexArray.map(idx => {
+                const v = currentPolyhedron.vertices[idx];
+                return [v[0], v[1], v[2] * zScale];
+            });
+
+            // Remap faces to use new vertex indices
+            const faces = currentPolyhedron.faces.map(face => {
+                return face.map(vIdx => indexMap.get(vIdx));
+            }).filter(face => face.every(idx => idx !== undefined));
+
+            if (vertices.length === 0) {
+                alert('No vertices to export');
+                return;
+            }
+
+            // Generate filename based on notation and animation type
+            const filename = `${currentNotation}_${type}.skyc`;
+
+            // Build export data
+            const exportData = {
+                vertices,
+                faces,
+                filename,
+                animation: {
+                    enableRotation: type === 'rotate' || type === 'combined',
+                    rotationSpeed,
+                    enableScale: type === 'shrink' || type === 'combined',
+                    shrinkSpeed,
+                    scaleStart,
+                    scaleEnd,
+                    duration,
+                    fps: 25
+                },
+                bounds: { targetEdgeLength: 4, altitudeOffset: 15 }
+            };
+
+            try {
+                const response = await fetch('/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(exportData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Export failed');
+                }
+
+                const result = await response.json();
+                alert(`Success!\n\n${result.message}\n\nAnimation: ${type}\nFile: ${result.filename}`);
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`Export failed: ${error.message}`);
+            }
+        }
+
         function subdivideEdges() {
             if (!currentPolyhedron) return;
 
@@ -846,7 +1437,8 @@
                 currentPolyhedron = poly;
                 currentNotation = notation;
 
-                // Clear undo/redo history for new polyhedron
+                // Stop any playing animation and clear history
+                stopAnimation();
                 clearHistory();
 
                 // Update display
@@ -878,6 +1470,316 @@
             return usedVertices;
         }
 
+        // Polygon type names
+        const POLYGON_NAMES = {
+            3: 'Triangle',
+            4: 'Quadrilateral',
+            5: 'Pentagon',
+            6: 'Hexagon',
+            7: 'Heptagon',
+            8: 'Octagon',
+            9: 'Nonagon',
+            10: 'Decagon',
+            11: 'Hendecagon',
+            12: 'Dodecagon'
+        };
+
+        function getPolygonName(sides) {
+            return POLYGON_NAMES[sides] || `${sides}-gon`;
+        }
+
+        function getPolygonSignature(poly, face) {
+            // Calculate edge lengths for the face
+            const edgeLengths = [];
+            for (let i = 0; i < face.length; i++) {
+                const v1 = poly.vertices[face[i]];
+                const v2 = poly.vertices[face[(i + 1) % face.length]];
+                const dx = v2[0] - v1[0];
+                const dy = v2[1] - v1[1];
+                const dz = v2[2] - v1[2];
+                const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                edgeLengths.push(Math.round(length * 1000) / 1000); // Round to 3 decimals
+            }
+            // Sort to create a normalized signature
+            return edgeLengths.sort((a, b) => a - b).join(',');
+        }
+
+        function analyzePolygonTypes(poly) {
+            // Group faces by number of sides AND shape signature
+            const typesBySignature = {};
+
+            poly.faces.forEach((face, index) => {
+                const sides = face.length;
+                const signature = getPolygonSignature(poly, face);
+                const key = `${sides}:${signature}`;
+
+                if (!typesBySignature[key]) {
+                    typesBySignature[key] = {
+                        sides: sides,
+                        signature: signature,
+                        count: 0,
+                        faceIndices: [],
+                        vertexIndices: new Set()
+                    };
+                }
+                typesBySignature[key].count++;
+                typesBySignature[key].faceIndices.push(index);
+                face.forEach(vIdx => typesBySignature[key].vertexIndices.add(vIdx));
+            });
+
+            // Group by number of sides to assign variant numbers
+            const sideGroups = {};
+            Object.keys(typesBySignature).forEach(key => {
+                const type = typesBySignature[key];
+                if (!sideGroups[type.sides]) {
+                    sideGroups[type.sides] = [];
+                }
+                sideGroups[type.sides].push({ key, ...type });
+            });
+
+            // Assign variant numbers and build final result
+            const result = {};
+            Object.keys(sideGroups).forEach(sides => {
+                const variants = sideGroups[sides];
+                // Sort variants by count (descending) for consistent ordering
+                variants.sort((a, b) => b.count - a.count);
+
+                variants.forEach((variant, idx) => {
+                    const variantNum = variants.length > 1 ? idx + 1 : 0;
+                    result[variant.key] = {
+                        sides: variant.sides,
+                        variantNum: variantNum,
+                        totalVariants: variants.length,
+                        count: variant.count,
+                        faceIndices: variant.faceIndices,
+                        vertexIndices: variant.vertexIndices
+                    };
+                });
+            });
+
+            return result;
+        }
+
+        function drawPolygonShape(canvas, sides) {
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 2 - 4;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw the polygon
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                // Start from top (-PI/2) and go clockwise
+                const angle = (2 * Math.PI * i / sides) - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+
+            // Fill with gradient
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Stroke
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function removePolygonsByType(typeKey) {
+            if (!currentPolyhedron) return;
+
+            // Save state for undo
+            saveStateForUndo();
+
+            // Get the polygon type info
+            const types = analyzePolygonTypes(currentPolyhedron);
+            const typeInfo = types[typeKey];
+
+            if (!typeInfo) return;
+
+            // Get vertices to remove from this specific polygon type
+            const verticesToRemove = typeInfo.vertexIndices;
+
+            // Remove all faces that contain any of these vertices
+            currentPolyhedron.faces = currentPolyhedron.faces.filter(face => {
+                // Keep face only if none of its vertices are in the removal set
+                return !face.some(vIdx => verticesToRemove.has(vIdx));
+            });
+
+            // Re-display the polyhedron
+            displayPolyhedron(currentPolyhedron, currentNotation);
+            updateInfo(currentPolyhedron, currentNotation);
+            updateUndoRedoButtons();
+        }
+
+        function removeHalfPolygonsByType(typeKey) {
+            if (!currentPolyhedron) return;
+
+            // Save state for undo
+            saveStateForUndo();
+
+            // Get the polygon type info
+            const types = analyzePolygonTypes(currentPolyhedron);
+            const typeInfo = types[typeKey];
+
+            if (!typeInfo || typeInfo.count < 2) return;
+
+            // Calculate center of each face
+            const faceCenters = typeInfo.faceIndices.map(faceIdx => {
+                const face = currentPolyhedron.faces[faceIdx];
+                let cx = 0, cy = 0, cz = 0;
+                face.forEach(vIdx => {
+                    const v = currentPolyhedron.vertices[vIdx];
+                    cx += v[0];
+                    cy += v[1];
+                    cz += v[2];
+                });
+                return {
+                    faceIdx,
+                    center: [cx / face.length, cy / face.length, cz / face.length]
+                };
+            });
+
+            // Find symmetrical pairs (center1 ≈ -center2)
+            const tolerance = 0.01;
+            const paired = new Set();
+            const pairs = [];
+
+            for (let i = 0; i < faceCenters.length; i++) {
+                if (paired.has(i)) continue;
+
+                const c1 = faceCenters[i].center;
+
+                for (let j = i + 1; j < faceCenters.length; j++) {
+                    if (paired.has(j)) continue;
+
+                    const c2 = faceCenters[j].center;
+
+                    // Check if c2 ≈ -c1 (symmetric around origin)
+                    const dx = Math.abs(c1[0] + c2[0]);
+                    const dy = Math.abs(c1[1] + c2[1]);
+                    const dz = Math.abs(c1[2] + c2[2]);
+
+                    if (dx < tolerance && dy < tolerance && dz < tolerance) {
+                        pairs.push([faceCenters[i].faceIdx, faceCenters[j].faceIdx]);
+                        paired.add(i);
+                        paired.add(j);
+                        break;
+                    }
+                }
+            }
+
+            // Remove pairs until we've removed about half
+            const pairsToRemove = Math.ceil(pairs.length / 2);
+            const faceIndicesToRemove = new Set();
+
+            for (let i = 0; i < pairsToRemove && i < pairs.length; i++) {
+                faceIndicesToRemove.add(pairs[i][0]);
+                faceIndicesToRemove.add(pairs[i][1]);
+            }
+
+            // If we couldn't find enough pairs, fall back to removing unpaired faces
+            if (faceIndicesToRemove.size === 0 && typeInfo.count >= 2) {
+                // Fallback: remove every other face
+                typeInfo.faceIndices.forEach((faceIdx, i) => {
+                    if (i % 2 === 1) {
+                        faceIndicesToRemove.add(faceIdx);
+                    }
+                });
+            }
+
+            // Collect ALL vertices from faces being removed
+            const verticesToRemove = new Set();
+            faceIndicesToRemove.forEach(faceIdx => {
+                currentPolyhedron.faces[faceIdx].forEach(vIdx => {
+                    verticesToRemove.add(vIdx);
+                });
+            });
+
+            // Remove ALL faces that contain any of these vertices
+            currentPolyhedron.faces = currentPolyhedron.faces.filter(face => {
+                return !face.some(vIdx => verticesToRemove.has(vIdx));
+            });
+
+            // Re-display the polyhedron
+            displayPolyhedron(currentPolyhedron, currentNotation);
+            updateInfo(currentPolyhedron, currentNotation);
+            updateUndoRedoButtons();
+        }
+
+        function updatePolygonTypesDisplay(poly) {
+            const container = document.getElementById('polygon-types-container');
+            const types = analyzePolygonTypes(poly);
+            const typeKeys = Object.keys(types);
+
+            if (typeKeys.length === 0) {
+                container.innerHTML = '<div style="color: #666; font-size: 13px;">No faces remaining</div>';
+                return;
+            }
+
+            // Sort by sides first, then by variant number
+            typeKeys.sort((a, b) => {
+                const sidesA = types[a].sides;
+                const sidesB = types[b].sides;
+                if (sidesA !== sidesB) return sidesA - sidesB;
+                return types[a].variantNum - types[b].variantNum;
+            });
+
+            let html = '';
+            typeKeys.forEach(key => {
+                const typeInfo = types[key];
+                const baseName = getPolygonName(typeInfo.sides);
+                // Add variant number if there are multiple variants of this polygon type
+                const name = typeInfo.variantNum > 0 ? `${baseName} ${typeInfo.variantNum}` : baseName;
+                const canvasId = `polygon-canvas-${key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                const escapedKey = key.replace(/'/g, "\\'");
+
+                html += `
+                    <div class="polygon-type-card">
+                        <canvas id="${canvasId}" class="polygon-canvas" width="50" height="50"></canvas>
+                        <div class="polygon-info">
+                            <div class="polygon-name">${name}</div>
+                            <div class="polygon-count">${typeInfo.count} face${typeInfo.count !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="polygon-buttons">
+                            <button class="remove-half-btn" onclick="removeHalfPolygonsByType('${escapedKey}')"
+                                    ${typeInfo.count < 2 ? 'disabled title="Need at least 2 faces"' : ''}>
+                                Remove Half
+                            </button>
+                            <button class="remove-polygon-btn" onclick="removePolygonsByType('${escapedKey}')"
+                                    ${typeKeys.length <= 1 ? 'disabled title="Cannot remove last polygon type"' : ''}>
+                                Remove All
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Draw polygon shapes on canvases
+            typeKeys.forEach(key => {
+                const canvasId = `polygon-canvas-${key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                    drawPolygonShape(canvas, types[key].sides);
+                }
+            });
+        }
+
         function createVertexSpheres(poly, center, scale) {
             // Get only vertices that are used by faces
             const usedVertices = getUsedVertices(poly);
@@ -889,13 +1791,13 @@
             // Create glowing sphere geometry (shared)
             const sphereGeometry = new THREE.SphereGeometry(0.05, 16, 16);
 
-            // Create glowing material
+            // Create glowing white material
             const sphereMaterial = new THREE.MeshStandardMaterial({
-                color: 0x667eea,
-                emissive: 0x667eea,
-                emissiveIntensity: 1.0,
+                color: 0xffffff,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.8,
                 roughness: 0.3,
-                metalness: 0.7
+                metalness: 0.5
             });
 
             usedVertices.forEach(vIdx => {
@@ -1108,6 +2010,19 @@
             document.getElementById('vertex-count').textContent = usedVertices.size;
             document.getElementById('face-count').textContent = poly.faces.length;
 
+            // Count unique edges
+            const edgeSet = new Set();
+            poly.faces.forEach(face => {
+                for (let i = 0; i < face.length; i++) {
+                    const v1 = face[i];
+                    const v2 = face[(i + 1) % face.length];
+                    // Create a unique key for the edge (smaller index first)
+                    const edgeKey = v1 < v2 ? `${v1}-${v2}` : `${v2}-${v1}`;
+                    edgeSet.add(edgeKey);
+                }
+            });
+            document.getElementById('edge-count').textContent = edgeSet.size;
+
             // Display only used vertices
             const verticesList = document.getElementById('vertices-list');
             let html = '';
@@ -1123,6 +2038,9 @@
             }
 
             verticesList.innerHTML = html;
+
+            // Update polygon types display
+            updatePolygonTypesDisplay(poly);
         }
 
         function loadExample(notation) {
@@ -1286,6 +2204,31 @@
             }
         });
 
+        // Animate panel
+        document.getElementById('animate-btn').addEventListener('click', () => {
+            document.getElementById('animate-panel').classList.toggle('active');
+        });
+
+        document.getElementById('close-animate-panel').addEventListener('click', () => {
+            stopAnimation();
+            document.getElementById('animate-panel').classList.remove('active');
+        });
+
+        // Play buttons
+        document.getElementById('play-rotate').addEventListener('click', () => startAnimation('rotate'));
+        document.getElementById('play-shrink').addEventListener('click', () => startAnimation('shrink'));
+        document.getElementById('play-combined').addEventListener('click', () => startAnimation('combined'));
+
+        // Stop buttons
+        document.getElementById('stop-rotate').addEventListener('click', stopAnimation);
+        document.getElementById('stop-shrink').addEventListener('click', stopAnimation);
+        document.getElementById('stop-combined').addEventListener('click', stopAnimation);
+
+        // Export buttons
+        document.getElementById('export-rotate').addEventListener('click', () => exportAnimation('rotate'));
+        document.getElementById('export-shrink').addEventListener('click', () => exportAnimation('shrink'));
+        document.getElementById('export-combined').addEventListener('click', () => exportAnimation('combined'));
+
         // Subdivide edges button
         document.getElementById('subdivide-edges').addEventListener('click', () => {
             if (!currentPolyhedron) {
@@ -1293,64 +2236,6 @@
                 return;
             }
             subdivideEdges();
-        });
-
-        // Export to Skybrush
-        document.getElementById('export-skybrush').addEventListener('click', async () => {
-            if (!currentPolyhedron) {
-                alert('Please generate a polyhedron first');
-                return;
-            }
-
-            const button = document.getElementById('export-skybrush');
-            button.disabled = true;
-            button.textContent = 'Exporting...';
-
-            try {
-                // Get only the used vertices with Z scale applied
-                const usedVertices = getUsedVertices(currentPolyhedron);
-                const vertices = Array.from(usedVertices).map(idx => {
-                    const v = currentPolyhedron.vertices[idx];
-                    return [v[0], v[1], v[2] * zScale];
-                });
-
-                if (vertices.length === 0) {
-                    alert('No vertices to export');
-                    button.disabled = false;
-                    button.textContent = 'Export to Skybrush';
-                    return;
-                }
-
-                // Generate filename based on notation
-                const filename = `${currentNotation}_vertices.skyc`;
-
-                // Send export request to server
-                const response = await fetch('/export', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ vertices, filename })
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Export failed');
-                }
-
-                const result = await response.json();
-
-                alert(`Success!\n\n${result.message}\n\nVertices have been rescaled to bounds (-50, 50) in each direction.\nFile saved as: ${result.filename}`);
-
-                button.disabled = false;
-                button.textContent = 'Export to Skybrush';
-
-            } catch (error) {
-                console.error('Export error:', error);
-                alert(`Export failed: ${error.message}`);
-                button.disabled = false;
-                button.textContent = 'Export to Skybrush';
-            }
         });
 
         // Initialize
