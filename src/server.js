@@ -14,7 +14,7 @@ const server = http.createServer((req, res) => {
 
     if (req.method === 'GET' && req.url === '/') {
         // Serve the HTML file
-        fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
+        fs.readFile(path.join(__dirname, '../public/index.html'), (err, data) => {
             if (err) {
                 res.writeHead(500);
                 res.end('Error loading index.html');
@@ -58,15 +58,16 @@ const server = http.createServer((req, res) => {
             try {
                 const { vertices, filename } = JSON.parse(body);
                 const outputFile = filename || 'vertices_show.skyc';
+                const outputPath = path.join(__dirname, '../output', outputFile);
 
                 // Convert vertices to JSON string for command line
                 const verticesJson = JSON.stringify(vertices);
-                const escapedJson = verticesJson.replace(/"/g, '\\"');
 
                 // Call Python export script
-                const pythonCmd = `python3 export_vertices.py '${verticesJson}' '${outputFile}'`;
+                const pythonScript = path.join(__dirname, 'python/export_vertices.py');
+                const pythonCmd = `python3 "${pythonScript}" '${verticesJson}' '${outputPath}'`;
 
-                exec(pythonCmd, { cwd: __dirname }, (error, stdout, stderr) => {
+                exec(pythonCmd, { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
                     if (error) {
                         console.error('Export error:', stderr);
                         res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -80,8 +81,8 @@ const server = http.createServer((req, res) => {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
                         success: true,
-                        filename: outputFile,
-                        message: `Exported ${vertices.length} vertices to ${outputFile}`
+                        filename: outputPath,
+                        message: `Exported ${vertices.length} vertices to output/${outputFile}`
                     }));
                 });
             } catch (error) {

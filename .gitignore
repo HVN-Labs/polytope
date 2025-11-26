@@ -3,3 +3,8 @@ __pycache__/
 venv/
 *.pyc
 .DS_Store
+
+# Keep output folder but ignore generated files
+output/*.skyc
+output/*.png
+!output/.gitkeep

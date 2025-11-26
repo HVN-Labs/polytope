@@ -1,15 +1,21 @@
 {
   "name": "polytope",
   "version": "1.0.0",
+  "description": "Conway-Hart polyhedron generator with Skybrush drone show export",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "polyhedron",
+    "conway-hart",
+    "skybrush",
+    "drone-show",
+    "3d"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "conway-hart": "^0.1.0"
   }
