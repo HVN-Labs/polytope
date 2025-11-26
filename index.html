@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway-Hart Polyhedron Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 200px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        button.active {
+            background: #e74c3c;
+        }
+
+        button.active:hover {
+            background: #c0392b;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 5px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .toggle-group button {
+            padding: 8px 15px;
+            font-size: 14px;
+            background: white;
+            color: #666;
+        }
+
+        .toggle-group button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .mode-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+            z-index: 100;
+        }
+
+        .mode-indicator.active {
+            display: block;
+        }
+
+        .examples {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .examples span {
+            color: #667eea;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: background 0.3s;
+        }
+
+        .examples span:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            gap: 0;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .info-panel {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-panel h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .vertices-list {
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .vertex {
+            padding: 3px 0;
+            color: #333;
+        }
+
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .legend {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .legend h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .legend code {
+            background: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Conway-Hart Polyhedron Viewer</h1>
+        <div class="controls">
+            <div class="input-group">
+                <label for="notation">Conway Notation:</label>
+                <input type="text" id="notation" value="T" placeholder="e.g., T, C, dT, kC">
+                <button id="generate">Generate</button>
+            </div>
+            <div class="input-group">
+                <label for="z-scale">Vertical Scale:</label>
+                <input type="range" id="z-scale" min="0.1" max="3" step="0.1" value="1" style="width: 150px;">
+                <span id="z-scale-value">1.0</span>
+            </div>
+            <div class="toggle-group">
+                <button id="view-vertices" class="active">Vertices Only</button>
+                <button id="view-full">Full Polyhedron</button>
+            </div>
+            <button id="remove-polygon-mode">Remove Polygon</button>
+            <button id="remove-vertex-mode">Remove Vertex</button>
+            <button id="subdivide-edges" style="background: #3498db;">Subdivide Edges</button>
+            <button id="export-skybrush" style="background: #27ae60;">Export to Skybrush</button>
+        </div>
+        <div class="examples">
+            <strong>Seeds:</strong>
+            <span onclick="loadExample('T')">T</span>
+            <span onclick="loadExample('C')">C</span>
+            <span onclick="loadExample('O')">O</span>
+            <span onclick="loadExample('D')">D</span>
+            <span onclick="loadExample('I')">I</span>
+            |
+            <strong>Operators:</strong>
+            <span onclick="loadExample('dC')">dC (dual)</span>
+            <span onclick="loadExample('kC')">kC (kis)</span>
+            <span onclick="loadExample('aD')">aD (ambo)</span>
+            <span onclick="loadExample('gC')">gC (gyro)</span>
+            <span onclick="loadExample('pC')">pC (propellor)</span>
+            <span onclick="loadExample('tC')">tC (truncate)</span>
+            <span onclick="loadExample('eC')">eC (explode)</span>
+            <span onclick="loadExample('jC')">jC (join)</span>
+            <span onclick="loadExample('sC')">sC (snub)</span>
+            <span onclick="loadExample('cC')">cC (canonicalize)</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="canvas-container">
+            <div class="loading" id="loading">Loading...</div>
+            <div class="mode-indicator" id="mode-indicator">🎯 REMOVE POLYGON MODE - Click to remove | Drag to rotate</div>
+        </div>
+        <div class="info-panel">
+            <h2>Polyhedron Information</h2>
+            <div id="info-content">
+                <div class="info-section">
+                    <div class="stat">
+                        <span class="stat-label">Name:</span>
+                        <span class="stat-value" id="poly-name">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Notation:</span>
+                        <span class="stat-value" id="current-notation">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Vertices:</span>
+                        <span class="stat-value" id="vertex-count">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Faces:</span>
+                        <span class="stat-value" id="face-count">-</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>Vertex Coordinates</h3>
+                    <div class="vertices-list" id="vertices-list">
+                        No polyhedron loaded
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="legend">
+                        <h4>Conway Notation Guide</h4>
+                        <strong>Seeds:</strong><br>
+                        <code>T</code>=Tetrahedron, <code>C</code>=Cube, <code>O</code>=Octahedron, <code>I</code>=Icosahedron, <code>D</code>=Dodecahedron<br>
+                        <code>P[n]</code>=Prism, <code>A[n]</code>=Antiprism, <code>Y[n]</code>=Pyramid<br><br>
+                        <strong>Basic Operators:</strong><br>
+                        <code>d</code>=dual, <code>k</code>=kis, <code>a</code>=ambo, <code>g</code>=gyro, <code>p</code>=propellor<br>
+                        <code>r</code>=reflect, <code>c</code>=canonicalize<br><br>
+                        <strong>Compound Operators:</strong><br>
+                        <code>e</code>=explode (aa), <code>b</code>=bevel (ta), <code>o</code>=ortho (jj)<br>
+                        <code>m</code>=meta (kj), <code>t</code>=truncate (dkd), <code>j</code>=join (dad), <code>s</code>=snub (dgd)<br><br>
+                        <strong>Examples:</strong><br>
+                        <code>dC</code>=dual of cube, <code>kT</code>=kis tetrahedron, <code>tD</code>=truncated dodecahedron
+                    </div>
+                </div>
+
+                <div id="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, polyhedronMesh, edgesMesh, raycaster, mouse;
+        let currentPolyhedron = null;
+        let currentNotation = '';
+        let isDragging = false;
+        let viewMode = 'vertices'; // 'vertices' or 'full'
+        let removePolygonMode = false;
+        let removeVertexMode = false;
+        let faceObjects = []; // Store individual face meshes for raycasting
+        let vertexSpheresGroup = null; // Group containing all vertex spheres
+        let vertexSphereMap = new Map(); // Map vertex index to sphere mesh
+        let zScale = 1.0; // Vertical scale factor
+
+        // Initialize Three.js scene
+        function initScene() {
+            const container = document.getElementById('canvas-container');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.z = 5;
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+            directionalLight2.position.set(-5, -5, -5);
+            scene.add(directionalLight2);
+
+            // Initialize raycaster for polygon selection
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+
+            // Mouse controls for rotation and selection
+            let previousMousePosition = { x: 0, y: 0 };
+            let mouseDownPos = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                mouseDownPos = { x: e.clientX, y: e.clientY };
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+
+                    if (polyhedronMesh) {
+                        polyhedronMesh.rotation.y += deltaX * 0.01;
+                        polyhedronMesh.rotation.x += deltaY * 0.01;
+                    }
+
+                    if (edgesMesh) {
+                        edgesMesh.rotation.y += deltaX * 0.01;
+                        edgesMesh.rotation.x += deltaY * 0.01;
+                    }
+
+                    // Rotate all face objects
+                    faceObjects.forEach(obj => {
+                        obj.rotation.y += deltaX * 0.01;
+                        obj.rotation.x += deltaY * 0.01;
+                    });
+
+                    // Rotate vertex spheres group
+                    if (vertexSpheresGroup) {
+                        vertexSpheresGroup.rotation.y += deltaX * 0.01;
+                        vertexSpheresGroup.rotation.x += deltaY * 0.01;
+                    }
+
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+
+                // Update hover effect in remove modes (only when not dragging)
+                if (!isDragging && removePolygonMode && viewMode === 'full') {
+                    updateMousePosition(e);
+                    highlightHoveredFace();
+                } else if (!isDragging && removeVertexMode) {
+                    updateMousePosition(e);
+                    highlightHoveredVertex();
+                }
+            });
+
+            renderer.domElement.addEventListener('mouseup', (e) => {
+                // Check if it was a click (not a drag)
+                const dragDistance = Math.sqrt(
+                    Math.pow(e.clientX - mouseDownPos.x, 2) +
+                    Math.pow(e.clientY - mouseDownPos.y, 2)
+                );
+
+                if (dragDistance < 5 && removePolygonMode && viewMode === 'full') {
+                    // It's a click in remove polygon mode
+                    updateMousePosition(e);
+                    handleFaceClick();
+                } else if (dragDistance >= 5 && removePolygonMode && viewMode === 'full') {
+                    // Was a drag in remove polygon mode, reset face colors
+                    faceObjects.forEach(obj => {
+                        obj.material.color.setHex(0x667eea);
+                        obj.material.opacity = 0.7;
+                    });
+                } else if (dragDistance < 5 && removeVertexMode) {
+                    // It's a click in remove vertex mode
+                    updateMousePosition(e);
+                    handleVertexClick();
+                } else if (dragDistance >= 5 && removeVertexMode) {
+                    // Was a drag in remove vertex mode, reset vertex colors
+                    vertexSpheresGroup.children.forEach(sphere => {
+                        sphere.material.color.setHex(0x667eea);
+                        sphere.material.emissive.setHex(0x667eea);
+                    });
+                }
+
+                isDragging = false;
+            });
+
+            renderer.domElement.addEventListener('mouseleave', () => {
+                isDragging = false;
+
+                // Reset face colors when mouse leaves in remove polygon mode
+                if (removePolygonMode && viewMode === 'full') {
+                    faceObjects.forEach(obj => {
+                        obj.material.color.setHex(0x667eea);
+                        obj.material.opacity = 0.7;
+                    });
+                    renderer.domElement.style.cursor = 'default';
+                }
+
+                // Reset vertex colors when mouse leaves in remove vertex mode
+                if (removeVertexMode && vertexSpheresGroup) {
+                    vertexSpheresGroup.children.forEach(sphere => {
+                        sphere.material.color.setHex(0x667eea);
+                        sphere.material.emissive.setHex(0x667eea);
+                    });
+                    renderer.domElement.style.cursor = 'default';
+                }
+            });
+
+            // Animation loop
+            animate();
+
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Auto-rotation disabled - only manual rotation via mouse drag
+
+            renderer.render(scene, camera);
+        }
+
+        function updateMousePosition(event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        }
+
+        function highlightHoveredFace() {
+            // Reset all face colors
+            faceObjects.forEach(obj => {
+                obj.material.color.setHex(0x667eea);
+                obj.material.opacity = 0.7;
+            });
+
+            // Find intersected face
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(faceObjects, true);
+
+            if (intersects.length > 0) {
+                // Highlight the hovered face
+                intersects[0].object.material.color.setHex(0xe74c3c);
+                intersects[0].object.material.opacity = 0.9;
+                renderer.domElement.style.cursor = 'pointer';
+            } else {
+                renderer.domElement.style.cursor = 'default';
+            }
+        }
+
+        function handleFaceClick() {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(faceObjects, true);
+
+            if (intersects.length > 0 && currentPolyhedron) {
+                const clickedFace = intersects[0].object;
+                const faceIndex = faceObjects.indexOf(clickedFace);
+
+                if (faceIndex !== -1) {
+                    // Remove the face from the polyhedron data
+                    currentPolyhedron.faces.splice(faceIndex, 1);
+
+                    // Re-render the polyhedron
+                    displayPolyhedron(currentPolyhedron, currentNotation);
+                    updateInfo(currentPolyhedron, currentNotation);
+
+                    console.log(`Removed face ${faceIndex}. Remaining faces: ${currentPolyhedron.faces.length}`);
+                }
+            }
+        }
+
+        function highlightHoveredVertex() {
+            if (!vertexSpheresGroup) return;
+
+            // Reset all vertex colors
+            vertexSpheresGroup.children.forEach(sphere => {
+                sphere.material.color.setHex(0x667eea);
+                sphere.material.emissive.setHex(0x667eea);
+            });
+
+            // Find intersected vertex
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(vertexSpheresGroup.children, true);
+
+            if (intersects.length > 0) {
+                // Highlight the hovered vertex
+                intersects[0].object.material.color.setHex(0xe74c3c);
+                intersects[0].object.material.emissive.setHex(0xe74c3c);
+                renderer.domElement.style.cursor = 'pointer';
+            } else {
+                renderer.domElement.style.cursor = 'default';
+            }
+        }
+
+        function handleVertexClick() {
+            if (!vertexSpheresGroup || !currentPolyhedron) return;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(vertexSpheresGroup.children, true);
+
+            if (intersects.length > 0) {
+                const clickedSphere = intersects[0].object;
+                const vertexIndex = clickedSphere.userData.vertexIndex;
+
+                if (vertexIndex !== undefined) {
+                    // Remove all faces that contain this vertex
+                    currentPolyhedron.faces = currentPolyhedron.faces.filter(face => {
+                        return !face.includes(vertexIndex);
+                    });
+
+                    // Re-render the polyhedron
+                    displayPolyhedron(currentPolyhedron, currentNotation);
+                    updateInfo(currentPolyhedron, currentNotation);
+
+                    console.log(`Removed vertex ${vertexIndex} and all connected faces. Remaining faces: ${currentPolyhedron.faces.length}`);
+                }
+            }
+        }
+
+        function subdivideEdges() {
+            if (!currentPolyhedron) return;
+
+            console.log('Subdividing edges...');
+
+            const oldVertices = currentPolyhedron.vertices;
+            const oldFaces = currentPolyhedron.faces;
+
+            // New vertices and faces
+            const newVertices = [...oldVertices];
+            const newFaces = [];
+
+            // For each face, subdivide it
+            oldFaces.forEach(face => {
+                const faceVertexCount = face.length;
+
+                // Calculate face center
+                const centerVertex = [0, 0, 0];
+                face.forEach(vIdx => {
+                    const v = oldVertices[vIdx];
+                    centerVertex[0] += v[0];
+                    centerVertex[1] += v[1];
+                    centerVertex[2] += v[2];
+                });
+                centerVertex[0] /= faceVertexCount;
+                centerVertex[1] /= faceVertexCount;
+                centerVertex[2] /= faceVertexCount;
+
+                const centerIdx = newVertices.length;
+                newVertices.push(centerVertex);
+
+                // Add midpoint vertices for each edge and create new faces
+                const midpointIndices = [];
+                for (let i = 0; i < faceVertexCount; i++) {
+                    const v1Idx = face[i];
+                    const v2Idx = face[(i + 1) % faceVertexCount];
+                    const v1 = oldVertices[v1Idx];
+                    const v2 = oldVertices[v2Idx];
+
+                    // Calculate midpoint
+                    const midpoint = [
+                        (v1[0] + v2[0]) / 2,
+                        (v1[1] + v2[1]) / 2,
+                        (v1[2] + v2[2]) / 2
+                    ];
+
+                    const midpointIdx = newVertices.length;
+                    newVertices.push(midpoint);
+                    midpointIndices.push(midpointIdx);
+                }
+
+                // Create new quads for each edge
+                for (let i = 0; i < faceVertexCount; i++) {
+                    const vIdx = face[i];
+                    const midpoint1Idx = midpointIndices[i];
+                    const midpoint2Idx = midpointIndices[(i - 1 + faceVertexCount) % faceVertexCount];
+
+                    // Create quad: original vertex -> midpoint1 -> center -> midpoint2
+                    newFaces.push([vIdx, midpoint1Idx, centerIdx, midpoint2Idx]);
+                }
+            });
+
+            // Update polyhedron
+            currentPolyhedron.vertices = newVertices;
+            currentPolyhedron.faces = newFaces;
+
+            console.log(`Subdivision complete. New vertices: ${newVertices.length}, New faces: ${newFaces.length}`);
+
+            // Re-render
+            displayPolyhedron(currentPolyhedron, currentNotation);
+            updateInfo(currentPolyhedron, currentNotation);
+        }
+
+        async function generatePolyhedron(notation) {
+            try {
+                // Clear previous error
+                document.getElementById('error-message').innerHTML = '';
+
+                // Disable button during generation
+                const button = document.getElementById('generate');
+                button.disabled = true;
+                button.textContent = 'Generating...';
+
+                // Call the server API
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ notation })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to generate polyhedron');
+                }
+
+                const poly = await response.json();
+                currentPolyhedron = poly;
+                currentNotation = notation;
+
+                // Update display
+                displayPolyhedron(poly, notation);
+                updateInfo(poly, notation);
+
+                button.disabled = false;
+                button.textContent = 'Generate';
+
+            } catch (error) {
+                console.error('Error generating polyhedron:', error);
+                document.getElementById('error-message').innerHTML =
+                    `<div class="error">Error: ${error.message}</div>`;
+
+                const button = document.getElementById('generate');
+                button.disabled = false;
+                button.textContent = 'Generate';
+            }
+        }
+
+        function getUsedVertices(poly) {
+            // Find all vertices that are referenced by faces
+            const usedVertices = new Set();
+            poly.faces.forEach(face => {
+                face.forEach(vertexIndex => {
+                    usedVertices.add(vertexIndex);
+                });
+            });
+            return usedVertices;
+        }
+
+        function createVertexSpheres(poly, center, scale) {
+            // Get only vertices that are used by faces
+            const usedVertices = getUsedVertices(poly);
+
+            // Create a group to hold all vertex spheres
+            vertexSpheresGroup = new THREE.Group();
+            vertexSphereMap.clear();
+
+            // Create glowing sphere geometry (shared)
+            const sphereGeometry = new THREE.SphereGeometry(0.05, 16, 16);
+
+            // Create glowing material
+            const sphereMaterial = new THREE.MeshStandardMaterial({
+                color: 0x667eea,
+                emissive: 0x667eea,
+                emissiveIntensity: 1.0,
+                roughness: 0.3,
+                metalness: 0.7
+            });
+
+            usedVertices.forEach(vIdx => {
+                const v = poly.vertices[vIdx];
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial.clone());
+
+                // Position the sphere at the vertex location with Z scale applied
+                sphere.position.set(v[0], v[1], v[2] * zScale);
+                sphere.position.sub(center);
+                sphere.position.multiplyScalar(scale);
+
+                // Store vertex index in userData for later identification
+                sphere.userData.vertexIndex = vIdx;
+
+                vertexSpheresGroup.add(sphere);
+                vertexSphereMap.set(vIdx, sphere);
+            });
+
+            scene.add(vertexSpheresGroup);
+        }
+
+        function displayPolyhedron(poly, notation) {
+            // Preserve current rotation if any object exists
+            let savedRotation = null;
+            if (polyhedronMesh) {
+                savedRotation = {
+                    x: polyhedronMesh.rotation.x,
+                    y: polyhedronMesh.rotation.y,
+                    z: polyhedronMesh.rotation.z
+                };
+            } else if (vertexSpheresGroup) {
+                savedRotation = {
+                    x: vertexSpheresGroup.rotation.x,
+                    y: vertexSpheresGroup.rotation.y,
+                    z: vertexSpheresGroup.rotation.z
+                };
+            }
+
+            // Remove previous meshes
+            if (polyhedronMesh) {
+                scene.remove(polyhedronMesh);
+                polyhedronMesh.geometry.dispose();
+                polyhedronMesh.material.dispose();
+            }
+            if (edgesMesh) {
+                scene.remove(edgesMesh);
+                edgesMesh.geometry.dispose();
+                edgesMesh.material.dispose();
+            }
+            // Remove all face objects
+            faceObjects.forEach(obj => {
+                scene.remove(obj);
+                obj.geometry.dispose();
+                obj.material.dispose();
+            });
+            faceObjects = [];
+
+            // Remove vertex spheres group
+            if (vertexSpheresGroup) {
+                vertexSpheresGroup.children.forEach(sphere => {
+                    sphere.geometry.dispose();
+                    sphere.material.dispose();
+                });
+                scene.remove(vertexSpheresGroup);
+                vertexSpheresGroup = null;
+            }
+
+            // Create geometry
+            const geometry = new THREE.BufferGeometry();
+
+            // Vertices with Z scale applied
+            const vertices = [];
+            poly.vertices.forEach(v => {
+                vertices.push(v[0], v[1], v[2] * zScale);
+            });
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+            // Calculate center and scale for positioning
+            geometry.computeBoundingBox();
+            const center = new THREE.Vector3();
+            geometry.boundingBox.getCenter(center);
+            const size = new THREE.Vector3();
+            geometry.boundingBox.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 3 / maxDim;
+
+            if (viewMode === 'vertices') {
+                // VERTICES ONLY MODE
+                // Create glowing spheres for vertices
+                createVertexSpheres(poly, center, scale);
+
+                // No mesh or edges in vertices-only mode
+                polyhedronMesh = null;
+                edgesMesh = null;
+
+            } else {
+                // FULL POLYHEDRON MODE
+                // Faces indices for rendering (still need triangulation for mesh rendering)
+                const indices = [];
+                poly.faces.forEach(face => {
+                    // Triangulate face
+                    for (let i = 1; i < face.length - 1; i++) {
+                        indices.push(face[0], face[i], face[i + 1]);
+                    }
+                });
+                geometry.setIndex(indices);
+                geometry.computeVertexNormals();
+
+                // Create main mesh (semi-transparent or invisible)
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x667eea,
+                    shininess: 100,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.3
+                });
+
+                polyhedronMesh = new THREE.Mesh(geometry, material);
+                scene.add(polyhedronMesh);
+
+                // Create edges based on actual face polygons (not triangulated) with Z scale
+                const edgeVertices = [];
+                poly.faces.forEach(face => {
+                    // Draw edges around the actual polygon
+                    for (let i = 0; i < face.length; i++) {
+                        const v1 = poly.vertices[face[i]];
+                        const v2 = poly.vertices[face[(i + 1) % face.length]];
+                        edgeVertices.push(v1[0], v1[1], v1[2] * zScale);
+                        edgeVertices.push(v2[0], v2[1], v2[2] * zScale);
+                    }
+                });
+
+                const edgesGeometry = new THREE.BufferGeometry();
+                edgesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(edgeVertices, 3));
+                const edgesMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+                edgesMesh = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+                scene.add(edgesMesh);
+
+                // Position and scale both
+                polyhedronMesh.position.sub(center);
+                polyhedronMesh.scale.set(scale, scale, scale);
+                edgesMesh.position.sub(center);
+                edgesMesh.scale.set(scale, scale, scale);
+
+                // Create individual face objects for raycasting (only in full mode)
+                poly.faces.forEach((face, idx) => {
+                    const faceGeometry = new THREE.BufferGeometry();
+                    const faceVertices = [];
+
+                    face.forEach(vIdx => {
+                        const v = poly.vertices[vIdx];
+                        faceVertices.push(v[0], v[1], v[2] * zScale);
+                    });
+
+                    faceGeometry.setAttribute('position', new THREE.Float32BufferAttribute(faceVertices, 3));
+
+                    // Triangulate for the individual face
+                    const faceIndices = [];
+                    for (let i = 1; i < face.length - 1; i++) {
+                        faceIndices.push(0, i, i + 1);
+                    }
+                    faceGeometry.setIndex(faceIndices);
+                    faceGeometry.computeVertexNormals();
+
+                    const faceMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x667eea,
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.7
+                    });
+
+                    const faceMesh = new THREE.Mesh(faceGeometry, faceMaterial);
+                    faceMesh.position.sub(center);
+                    faceMesh.scale.set(scale, scale, scale);
+
+                    // Make face mesh invisible but still raycastable
+                    faceMesh.visible = false;
+
+                    scene.add(faceMesh);
+                    faceObjects.push(faceMesh);
+                });
+
+                // Create glowing spheres for vertices in full mode too
+                createVertexSpheres(poly, center, scale);
+            }
+
+            // Restore rotation if we had a previous rotation
+            if (savedRotation) {
+                if (polyhedronMesh) {
+                    polyhedronMesh.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
+                }
+                if (edgesMesh) {
+                    edgesMesh.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
+                }
+                faceObjects.forEach(obj => {
+                    obj.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
+                });
+                if (vertexSpheresGroup) {
+                    vertexSpheresGroup.rotation.set(savedRotation.x, savedRotation.y, savedRotation.z);
+                }
+            }
+        }
+
+        function updateInfo(poly, notation) {
+            document.getElementById('poly-name').textContent = poly.name || 'Unknown';
+            document.getElementById('current-notation').textContent = notation;
+
+            // Count only vertices that are still used by faces
+            const usedVertices = getUsedVertices(poly);
+            document.getElementById('vertex-count').textContent = usedVertices.size;
+            document.getElementById('face-count').textContent = poly.faces.length;
+
+            // Display only used vertices
+            const verticesList = document.getElementById('vertices-list');
+            let html = '';
+            const sortedIndices = Array.from(usedVertices).sort((a, b) => a - b);
+            sortedIndices.forEach(index => {
+                const vertex = poly.vertices[index];
+                const [x, y, z] = vertex.map(v => v.toFixed(4));
+                html += `<div class="vertex">v${index}: (${x}, ${y}, ${z})</div>`;
+            });
+
+            if (usedVertices.size === 0) {
+                html = '<div class="vertex">No vertices in use</div>';
+            }
+
+            verticesList.innerHTML = html;
+        }
+
+        function loadExample(notation) {
+            document.getElementById('notation').value = notation;
+            generatePolyhedron(notation);
+        }
+
+        // Event listeners
+        document.getElementById('generate').addEventListener('click', () => {
+            const notation = document.getElementById('notation').value.trim();
+            if (notation) {
+                generatePolyhedron(notation);
+            }
+        });
+
+        document.getElementById('notation').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const notation = document.getElementById('notation').value.trim();
+                if (notation) {
+                    generatePolyhedron(notation);
+                }
+            }
+        });
+
+        // View mode toggle
+        document.getElementById('view-vertices').addEventListener('click', () => {
+            viewMode = 'vertices';
+            document.getElementById('view-vertices').classList.add('active');
+            document.getElementById('view-full').classList.remove('active');
+
+            // Re-render if we have a polyhedron
+            if (currentPolyhedron) {
+                displayPolyhedron(currentPolyhedron, currentNotation);
+            }
+
+            // Disable remove polygon mode when switching to vertices
+            if (removePolygonMode) {
+                removePolygonMode = false;
+                document.getElementById('remove-polygon-mode').classList.remove('active');
+                document.getElementById('mode-indicator').classList.remove('active');
+                renderer.domElement.style.cursor = 'default';
+            }
+            // Keep remove vertex mode when switching to vertices view
+        });
+
+        document.getElementById('view-full').addEventListener('click', () => {
+            viewMode = 'full';
+            document.getElementById('view-full').classList.add('active');
+            document.getElementById('view-vertices').classList.remove('active');
+
+            // Re-render if we have a polyhedron
+            if (currentPolyhedron) {
+                displayPolyhedron(currentPolyhedron, currentNotation);
+            }
+        });
+
+        // Z scale slider
+        document.getElementById('z-scale').addEventListener('input', (e) => {
+            zScale = parseFloat(e.target.value);
+            document.getElementById('z-scale-value').textContent = zScale.toFixed(1);
+
+            // Re-render if we have a polyhedron
+            if (currentPolyhedron) {
+                displayPolyhedron(currentPolyhedron, currentNotation);
+            }
+        });
+
+        // Remove polygon mode toggle
+        document.getElementById('remove-polygon-mode').addEventListener('click', () => {
+            if (viewMode !== 'full') {
+                alert('Please switch to "Full Polyhedron" view to remove polygons');
+                return;
+            }
+
+            removePolygonMode = !removePolygonMode;
+            const button = document.getElementById('remove-polygon-mode');
+            const indicator = document.getElementById('mode-indicator');
+
+            if (removePolygonMode) {
+                // Disable vertex mode if active
+                if (removeVertexMode) {
+                    removeVertexMode = false;
+                    document.getElementById('remove-vertex-mode').classList.remove('active');
+                    if (vertexSpheresGroup) {
+                        vertexSpheresGroup.children.forEach(sphere => {
+                            sphere.material.color.setHex(0x667eea);
+                            sphere.material.emissive.setHex(0x667eea);
+                        });
+                    }
+                }
+
+                button.classList.add('active');
+                indicator.classList.add('active');
+            } else {
+                button.classList.remove('active');
+                indicator.classList.remove('active');
+                renderer.domElement.style.cursor = 'default';
+
+                // Reset face colors
+                faceObjects.forEach(obj => {
+                    obj.material.color.setHex(0x667eea);
+                    obj.material.opacity = 0.7;
+                });
+            }
+        });
+
+        // Remove vertex mode toggle
+        document.getElementById('remove-vertex-mode').addEventListener('click', () => {
+            removeVertexMode = !removeVertexMode;
+            const button = document.getElementById('remove-vertex-mode');
+            const indicator = document.getElementById('mode-indicator');
+
+            if (removeVertexMode) {
+                // Disable polygon mode if active
+                if (removePolygonMode) {
+                    removePolygonMode = false;
+                    document.getElementById('remove-polygon-mode').classList.remove('active');
+                    faceObjects.forEach(obj => {
+                        obj.material.color.setHex(0x667eea);
+                        obj.material.opacity = 0.7;
+                    });
+                }
+
+                button.classList.add('active');
+                indicator.classList.add('active');
+            } else {
+                button.classList.remove('active');
+                indicator.classList.remove('active');
+                renderer.domElement.style.cursor = 'default';
+
+                // Reset vertex colors
+                if (vertexSpheresGroup) {
+                    vertexSpheresGroup.children.forEach(sphere => {
+                        sphere.material.color.setHex(0x667eea);
+                        sphere.material.emissive.setHex(0x667eea);
+                    });
+                }
+            }
+        });
+
+        // Subdivide edges button
+        document.getElementById('subdivide-edges').addEventListener('click', () => {
+            if (!currentPolyhedron) {
+                alert('Please generate a polyhedron first');
+                return;
+            }
+            subdivideEdges();
+        });
+
+        // Export to Skybrush
+        document.getElementById('export-skybrush').addEventListener('click', async () => {
+            if (!currentPolyhedron) {
+                alert('Please generate a polyhedron first');
+                return;
+            }
+
+            const button = document.getElementById('export-skybrush');
+            button.disabled = true;
+            button.textContent = 'Exporting...';
+
+            try {
+                // Get only the used vertices with Z scale applied
+                const usedVertices = getUsedVertices(currentPolyhedron);
+                const vertices = Array.from(usedVertices).map(idx => {
+                    const v = currentPolyhedron.vertices[idx];
+                    return [v[0], v[1], v[2] * zScale];
+                });
+
+                if (vertices.length === 0) {
+                    alert('No vertices to export');
+                    button.disabled = false;
+                    button.textContent = 'Export to Skybrush';
+                    return;
+                }
+
+                // Generate filename based on notation
+                const filename = `${currentNotation}_vertices.skyc`;
+
+                // Send export request to server
+                const response = await fetch('/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ vertices, filename })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Export failed');
+                }
+
+                const result = await response.json();
+
+                alert(`Success!\n\n${result.message}\n\nVertices have been rescaled to bounds (-50, 50) in each direction.\nFile saved as: ${result.filename}`);
+
+                button.disabled = false;
+                button.textContent = 'Export to Skybrush';
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`Export failed: ${error.message}`);
+                button.disabled = false;
+                button.textContent = 'Export to Skybrush';
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initScene();
+            generatePolyhedron('T'); // Start with tetrahedron
+        });
+    </script>
+</body>
+</html>
